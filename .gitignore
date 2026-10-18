@@ -15,3 +15,9 @@ tmp/
 
 tools/sdk-buildtools/
 *.pfx
+
+# Local only: research notes and Microsoft Store submission prep (not published)
+docs/research/
+docs/store/
+packaging/msix/
+packaging/make_msix.ps1

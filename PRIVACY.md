@@ -1,6 +1,6 @@
-# Privacy Policy / 私隱政策
+# Privacy Policy / 隐私政策
 
-*Photo Finder Pro, last updated 2026-10-18 / 最後更新 2026-10-18*
+*Photo Finder Pro, last updated 2026-10-18 / 最后更新 2026-10-18*
 
 ## English
 
@@ -16,16 +16,16 @@ Face descriptors are biometric-style data, so please only search photo collectio
 
 **Contact:** open an issue at <https://github.com/Kylekk29/PhotoFinderPro/issues>. If this policy changes, the new version will be published at this address.
 
-## 繁體中文
+## 简体中文
 
-Photo Finder Pro 完全喺你自己部電腦上運行。
+Photo Finder Pro 完全在您自己的电脑上运行。
 
-- **冇網絡連線。** 本程式唔會連接網絡,冇更新檢查、冇分析工具、冇遙測,亦唔會向開發者或任何人傳送任何資料。
-- **冇帳戶、唔收集個人資料。** 毋須登入。開發者唔會收集、接收或者分享任何個人資料。
-- **留喺你部機嘅資料。** 為咗搜尋,程式會喺 `%LOCALAPPDATA%\PhotoFinderPro` 儲存:設定、掃描索引(檔案路徑同數字化嘅臉部特徵,即由臉計出嚟嘅一串數字)、縮圖,以及每次搜尋嘅參考臉快照。以上資料全部唔會離開你部電腦。
-- **你嘅相片。** 原相只會讀取,唔會改動、搬走或者刪除。搜尋時,符合嘅相片會複製到你自己揀嘅輸出資料夾(喺你自己嘅磁碟)。
-- **刪除所有資料。** 解除安裝程式,再刪除 `%LOCALAPPDATA%\PhotoFinderPro` 資料夾(如果係由 Microsoft Store 安裝,程式資料會隨程式一併移除)。你匯出咗嘅相片副本會留喺你揀嘅資料夾,要自己刪除。
+- **没有网络连接。** 本程序不会联网,没有更新检查、分析工具和遥测,也不会向开发者或任何人发送任何数据。
+- **没有账户,不收集个人信息。** 无需登录。开发者不会收集、接收或分享任何个人信息。
+- **留在您电脑上的数据。** 为了完成搜索,程序会在 `%LOCALAPPDATA%\PhotoFinderPro` 中保存:设置、扫描索引(文件路径和数字化的人脸特征,即由人脸计算出的一串数字)、缩略图,以及每次搜索的参考人脸快照。这些数据全部不会离开您的电脑。
+- **您的照片。** 原始照片只会被读取,不会被修改、移动或删除。搜索时,符合条件的照片会被复制到您自己选择的输出文件夹(位于您自己的磁盘上)。
+- **删除全部数据。** 卸载程序,再删除 `%LOCALAPPDATA%\PhotoFinderPro` 文件夹(如果是通过 Microsoft Store 安装的,程序数据会随程序一并移除)。您导出的照片副本会保留在您选择的文件夹中,需要自行删除。
 
-臉部特徵屬於生物特徵類資料,請只搜尋你擁有或者獲准使用嘅相片。
+人脸特征属于生物特征类数据,请只搜索您拥有或获准使用的照片。
 
-**聯絡:** 請喺 <https://github.com/Kylekk29/PhotoFinderPro/issues> 提出問題。如果本政策有更改,新版本會公佈喺同一個位置。
+**联系方式:** 请在 <https://github.com/Kylekk29/PhotoFinderPro/issues> 提出问题。如果本政策有变更,新版本会发布在同一位置。
