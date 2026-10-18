@@ -1,0 +1,34 @@
+Photo Finder Pro 1.0.0 - Third-party notices
+=============================================
+Photo Finder Pro bundles the components below. Versions are those installed in the build environment.
+Each component stays under its own license. Full license texts ship inside the application folder
+(PySide6/Qt, OpenCV, NumPy, Pillow and pi_heif keep their license files in their package folders under _internal\).
+
+Face models (OpenCV Zoo, https://github.com/opencv/opencv_zoo)
+  - YuNet face detector (models\yunet.onnx) - MIT License
+  - SFace face recognizer (models\sface.onnx) - Apache License 2.0
+
+Libraries
+  - OpenCV (opencv-python-headless 5.0.0.93) - Apache License 2.0
+  - NumPy 2.5.4 - BSD-3-Clause (the wheel also contains parts under 0BSD, MIT, Zlib, CC0-1.0)
+  - Pillow 13.0.0 - MIT-CMU (HPND) License
+  - pi_heif 1.4.0 - BSD-3-Clause
+      Bundled in the pi_heif wheel (separate DLLs, replaceable):
+      * libheif 1.23.0 - GNU LGPL v3.0 (or later)
+      * libde265 1.1.1 - GNU LGPL v3.0 (or later)
+      See _internal\pi_heif\ and the pi_heif license files for the full bundled-library license list.
+  - PySide6 / Qt for Python 6.12.0 (PySide6-Essentials, shiboken6) and the Qt libraries - GNU LGPL v3.0
+      (also available under GPL v2/v3 and commercial terms). Qt is used unmodified and dynamically linked;
+      the Qt/PySide6 DLLs are separate files in the application folder (_internal\PySide6\) and may be replaced
+      by your own build of the same version. Qt source: https://download.qt.io and https://code.qt.io
+  - Python 3.12 runtime - Python Software Foundation License
+
+Build tool
+  - PyInstaller 6.22.3 (GPL v2 or later with the bootloader exception that permits distributing the
+    resulting program under any license).
+
+LGPL-3.0 text: https://www.gnu.org/licenses/lgpl-3.0.txt
+Apache-2.0 text: https://www.apache.org/licenses/LICENSE-2.0
+MIT, BSD-3-Clause: see the license files of each package.
+
+Photo Finder Pro itself runs fully offline: no network access, no telemetry, no update checks.
