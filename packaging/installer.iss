@@ -1,6 +1,6 @@
 ﻿; Inno Setup 6 script. Build: ISCC packaging\installer.iss  (after the onedir build exists in dist\PhotoFinderPro)
 #define AppName "Photo Finder Pro"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.1"
 #define AppExe "PhotoFinderPro.exe"
 
 [Setup]
@@ -9,10 +9,15 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher=Kylekk29
+AppCopyright=Copyright (C) 2026 Kylekk29. MIT License.
 AppPublisherURL=https://github.com/Kylekk29/PhotoFinderPro
 AppSupportURL=https://github.com/Kylekk29/PhotoFinderPro/issues
 AppUpdatesURL=https://github.com/Kylekk29/PhotoFinderPro/releases
 VersionInfoVersion={#AppVersion}
+VersionInfoDescription={#AppName} Setup
+VersionInfoProductName={#AppName}
+ShowLanguageDialog=auto
+UsePreviousLanguage=no
 PrivilegesRequired=lowest
 DefaultDirName={localappdata}\Programs\{#AppName}
 DefaultGroupName={#AppName}
@@ -33,6 +38,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "chinesesimplified"; MessagesFile: "lang\ChineseSimplified.isl"
+
+[CustomMessages]
+english.UninstallAskData=Also delete Photo Finder Pro settings, scan index and thumbnails?%n%n%1%n%nYour photos and saved results are NOT affected. Choose No to keep them (for a later reinstall).
+chinesesimplified.UninstallAskData=是否同时删除 Photo Finder Pro 的设置、扫描索引和缩略图?%n%n%1%n%n您的照片和已保存的结果不受影响。选择“否”可保留这些数据,以便日后重新安装。
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
@@ -42,7 +52,7 @@ Source: "..\dist\PhotoFinderPro\*"; DestDir: "{app}"; Flags: recursesubdirs crea
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
-Name: "{autoprograms}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
+Name: "{autoprograms}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Run]
@@ -59,9 +69,7 @@ begin
   begin
     DataDir := ExpandConstant('{localappdata}\PhotoFinderPro');
     if DirExists(DataDir) then
-      if MsgBox('Also delete Photo Finder Pro settings, scan index and thumbnails?' + #13#10 + #13#10 +
-                DataDir + #13#10 + #13#10 +
-                'Your photos and saved results are NOT affected. Choose No to keep them (for a later reinstall).',
+      if MsgBox(FmtMessage(CustomMessage('UninstallAskData'), [DataDir]),
                 mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
         DelTree(DataDir, True, True, True);
   end;

@@ -1,8 +1,11 @@
-"""UI language. The Traditional Chinese (Cantonese) text is the key; other languages map it to a translation.
+"""UI language. The source string (Cantonese) is only a key: "zh" maps it to written Simplified Chinese (i18n_zh.py),
+"en" to English (EN below).
 
 tr("共 {n} 張", n=3) -> "共 3 張" (zh) or "3 photos" (en). A missing translation falls back to the key.
 """
-LANGS = {"zh": "繁體中文", "en": "English"}
+from .i18n_zh import ZH
+
+LANGS = {"zh": "简体中文", "en": "English"}
 _lang = "zh"
 
 EN = {
@@ -217,6 +220,7 @@ EN = {
     "第三方授權聲明": "Third-party notices",
     "開啟 THIRD_PARTY_NOTICES.txt": "Open THIRD_PARTY_NOTICES.txt",
     "關閉": "Close",
+    "Photo Finder Pro 已經開咗一個視窗。一次只可以開一個。": "Photo Finder Pro is already open. Only one window can run at a time.",
 }
 
 
@@ -230,5 +234,5 @@ def lang():
 
 
 def tr(text, **kw):
-    s = EN.get(text, text) if _lang == "en" else text
+    s = EN.get(text, text) if _lang == "en" else ZH.get(text, text)
     return s.format(**kw) if kw else s

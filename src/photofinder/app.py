@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from . import APP_NAME, __version__, paths
+from .i18n import tr
 
 APP_ID = "PhotoFinderPro.App"
 
@@ -74,10 +75,10 @@ def main():
     app.setApplicationVersion(__version__)
     app.setOrganizationName(APP_NAME)
     app.setWindowIcon(QIcon(str(asset_path("app.ico"))))
-    app.setFont(QFont("Microsoft JhengHei UI", 10))
+    app.setFont(QFont("Microsoft YaHei UI", 10))
     lock = SingleInstance(paths.app_home() / "app.lock")
     if not lock.acquire():
-        QMessageBox.warning(None, APP_NAME, "Photo Finder Pro 已經開咗一個視窗。一次只可以開一個。")
+        QMessageBox.warning(None, APP_NAME, tr("Photo Finder Pro 已經開咗一個視窗。一次只可以開一個。"))
         return 1
     try:
         from .ui import MainWindow

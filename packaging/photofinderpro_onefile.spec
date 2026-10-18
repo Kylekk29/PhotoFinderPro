@@ -19,6 +19,6 @@ a = Analysis([str(ROOT / "packaging" / "launch.py")], pathex=[str(SRC)], binarie
              hiddenimports=["pi_heif"], excludes=EXCLUDES, noarchive=False)
 a.binaries = [b for b in a.binaries if "opengl32sw" not in b[0]]  # software-GL fallback (20 MB), unused by widgets
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name="PhotoFinderPro-1.0.0-x64-Portable", console=False,
+exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name="PhotoFinderPro-1.0.1-x64-Portable", console=False,
           icon=str(SRC / "photofinder" / "assets" / "app.ico"),
           version=str(ROOT / "packaging" / "version_info.txt"), upx=False)

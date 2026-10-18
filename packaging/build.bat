@@ -6,7 +6,7 @@ rem and SHA256SUMS.txt. Run from anywhere. Other files in dist\ (e.g. MSIX packa
 set ROOT=%~dp0..
 pushd "%ROOT%"
 set PY=venv\Scripts\python.exe
-set VER=1.0.0
+set VER=1.0.1
 set REPORT=%TEMP%\photofinderpro_selftest.txt
 set ISCC=
 if exist "%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" set "ISCC=%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe"

@@ -45,7 +45,7 @@ def test_set_lang_switches_tr():
         i18n.set_lang("en")
         assert i18n.tr("共 {n} 張", n=3) == "3 photos"
         i18n.set_lang("zh")
-        assert i18n.tr("共 {n} 張", n=3) == "共 3 張"
+        assert i18n.tr("共 {n} 張", n=3) == "共 3 张"
         i18n.set_lang("xx")   # unknown -> zh
         assert i18n.lang() == "zh"
         assert i18n.tr("未知文字") == "未知文字"

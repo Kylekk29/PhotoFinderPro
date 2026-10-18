@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QLabel, QPushButton
 from .. import theme
 from . import icons
 
-FONT = "Microsoft JhengHei UI"
+FONT = "Microsoft YaHei UI"
 THUMB_PX = 400   # thumbnails are built at this size once, tiles of any zoom level scale them down
 PER_PAGE = 120
 AVATAR = 54
