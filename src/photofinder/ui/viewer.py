@@ -14,11 +14,12 @@ from .common import button, label, pil_to_qimage
 class ViewerDialog(QDialog):
     """`items` = [(score, path)]; `on_verdict(path, verdict)` is given when the open search can be reviewed."""
 
-    def __init__(self, parent, items, boxes, start, verdicts=None, on_verdict=None, high=None):
+    def __init__(self, parent, items, boxes, start, verdicts=None, on_verdict=None, high=None, dates=None):
         super().__init__(parent)
         # Own copy: the grid keeps re-sorting its list while a scan adds matches; the viewer must not follow.
         self.items, self.boxes, self.i = list(items), boxes, start
         self.verdicts = dict(verdicts or {})
+        self.dates = dict(dates or {})   # {path: 'YYYY-MM-DD HH:MM:SS'} known so far
         self.on_verdict, self.high = on_verdict, high
         self.show_box = True
         self.setWindowTitle(tr("檢視"))
@@ -126,7 +127,8 @@ class ViewerDialog(QDialog):
         v = self.verdicts.get(path)
         self.state.setText({"yes": tr("✓ 已確認係佢"), "no": tr("✗ 已標記唔係佢")}.get(v, ""))
         self.state.setStyleSheet(f"color: {theme.GOOD if v == 'yes' else theme.DANGER}; font-weight: 700;")
-        self.path.setText(path)
+        taken = self.dates.get(path)
+        self.path.setText(f"{tr('拍攝日期')} {taken}  ·  {path}" if taken else path)
         self.btn_prev.setEnabled(self.i > 0)
         self.btn_next.setEnabled(self.i < len(self.items) - 1)
         self._fit()

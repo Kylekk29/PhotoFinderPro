@@ -6,8 +6,8 @@ ENGLISH
 Finds all photos of one person in your photo folders (face matching) and copies the matches to a folder you choose.
 
 Two ways to get it (you only need one):
-- Setup (recommended): double-click PhotoFinderPro-Setup-1.0.0.exe and follow the wizard. No admin rights needed. It adds a Start menu entry; uninstall from Windows Settings -> Apps.
-- Portable: double-click PhotoFinderPro-1.0.0-Portable.exe. Nothing is installed. The first start takes a few seconds while it unpacks.
+- Setup (recommended): double-click PhotoFinderPro-1.0.0-x64-Setup.exe and follow the wizard. No admin rights needed. It adds a Start menu entry; uninstall from Windows Settings -> Apps.
+- Portable: double-click PhotoFinderPro-1.0.0-x64-Portable.exe. Nothing is installed. The first start takes a few seconds while it unpacks.
 
 Windows may show "Windows protected your PC" (SmartScreen), because this app is not code-signed.
 Click "More info" -> "Run anyway". This only appears the first time.
@@ -22,8 +22,8 @@ Click "More info" -> "Run anyway". This only appears the first time.
 用人面比對,喺你嘅相簿資料夾搵出同一個人嘅所有相,再複製去你揀嘅資料夾。
 
 有兩種方法(揀一種就得):
-- 安裝版(建議):㩒兩下 PhotoFinderPro-Setup-1.0.0.exe,跟住嚮導行。唔使管理員權限,會加開始功能表捷徑;要移除就去 Windows「設定 → 應用程式」。
-- 免安裝版:㩒兩下 PhotoFinderPro-1.0.0-Portable.exe,唔會安裝任何嘢。第一次開會要幾秒鐘解壓。
+- 安裝版(建議):㩒兩下 PhotoFinderPro-1.0.0-x64-Setup.exe,跟住嚮導行。唔使管理員權限,會加開始功能表捷徑;要移除就去 Windows「設定 → 應用程式」。
+- 免安裝版:㩒兩下 PhotoFinderPro-1.0.0-x64-Portable.exe,唔會安裝任何嘢。第一次開會要幾秒鐘解壓。
 
 Windows 可能會顯示「Windows 已保護您的電腦」(SmartScreen),因為呢個程式冇數碼簽署。
 請㩒「其他資訊」->「仍要執行」。只會喺第一次出現。

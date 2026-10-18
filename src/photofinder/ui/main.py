@@ -6,7 +6,7 @@ with a live scan dashboard above them, a floating selection bar, a status footer
 import os
 
 import numpy as np
-from PySide6.QtCore import QSize, Qt, QThreadPool, QTimer
+from PySide6.QtCore import QByteArray, QSize, Qt, QThreadPool, QTimer
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFileDialog, QFrame, QHBoxLayout, QLineEdit,
                                QListWidget, QListWidgetItem, QMenu, QMessageBox, QProgressBar, QScrollArea,
@@ -17,7 +17,7 @@ from ..engine import FaceEngine
 from ..i18n import tr
 from ..imageio import SUPPORTED_EXTS
 from ..index import Index
-from . import icons
+from . import about, icons
 from .common import APP, AVATAR, THUMB_PX, button, circle, label, retint
 from .dialogs import FacePickerDialog
 from .grid import ResultGrid
@@ -49,6 +49,7 @@ class MainWindow(QWidget):
         self.setAcceptDrops(True)
         self.setMinimumSize(1100, 700)
         self.resize(1360, 860)
+        self._restore_geometry()
         self.index = Index()
         self._engine = None
         # A new (not yet started) search starts from these references; once a search is started its own
@@ -56,6 +57,7 @@ class MainWindow(QWidget):
         self.ref_paths, self.ref_counts, self.refs = matcher.load_refs()
         self.run = None   # the open search (a row of the runs table), or None for a new search
         self.boxes, self.verdicts, self._results = {}, {}, []
+        self.dates, self._date_asked, self._date_worker = {}, set(), None   # date taken, looked up lazily
         self.thumb_size = self.cfg["thumb"]
         self.worker = None
         self._busy = False
@@ -69,6 +71,9 @@ class MainWindow(QWidget):
         self._thr_timer = QTimer(self, singleShot=True, interval=250)
         self._thr_timer.timeout.connect(self._thr_changed)
         self._build()
+        self.sort.set_current(self.cfg["sort"])
+        for g in self.grids:
+            g.sort = self.cfg["sort"]
         for f in self.cfg["folders"]:
             self._add_folder_item(f)
         self.out_edit.setText(self.cfg["output"] or str(paths.default_output_dir()))
@@ -242,6 +247,11 @@ class MainWindow(QWidget):
         cl = QHBoxLayout(corner)
         cl.setContentsMargins(0, 0, 0, 4)
         cl.setSpacing(8)
+        self.sort = Segmented([("score", tr("相似度"), tr("最相似嘅排最前")),
+                               ("date", tr("拍攝日期"), tr("最新拍攝嘅排最前(讀取相片嘅 EXIF 日期,冇就用檔案日期)"))])
+        self.sort.setStyleSheet("QPushButton#seg { padding: 3px 12px; }")   # fits the tab bar height
+        self.sort.setFixedHeight(32)
+        self.sort.chosen.connect(self._sort_chosen)
         self.zoom = QSlider(Qt.Horizontal)
         self.zoom.setRange(ZOOM[0], ZOOM[1])
         self.zoom.setSingleStep(ZOOM[2])
@@ -259,10 +269,14 @@ class MainWindow(QWidget):
         self.act_refresh = QAction(tr("重新整理"), self)
         self.act_copy = QAction(tr("複製結果"), self)
         self.act_unchecked = QAction(tr("匯出無法檢查清單"), self)
+        self.act_updates = QAction(tr("檢查更新"), self)
+        self.act_about = QAction(tr("關於 Photo Finder Pro"), self)
+        self.act_updates.triggered.connect(lambda: about.open_url(about.RELEASES_URL))
+        self.act_about.triggered.connect(lambda: about.AboutDialog(self).exec())
         self.act_refresh.triggered.connect(self.refresh_results)
         self.act_copy.triggered.connect(self.copy_results)
         self.act_unchecked.triggered.connect(self.export_unchecked)
-        for w in (self.zoom, self.b_export_final, self.b_more):
+        for w in (self.sort, self.zoom, self.b_export_final, self.b_more):
             cl.addWidget(w)
         self.tabs.setCornerWidget(corner, Qt.TopRightCorner)
 
@@ -410,8 +424,51 @@ class MainWindow(QWidget):
     def save_settings(self):
         self.cfg.update(folders=[self.folder_list.item(i).data(Qt.UserRole) for i in range(self.folder_list.count())],
                         output=self.out_edit.text().strip(), low=self.low.value() / 100, high=self.high.value() / 100,
-                        last_run=self.run["id"] if self.run else None, thumb=self.thumb_size)
+                        last_run=self.run["id"] if self.run else None, thumb=self.thumb_size,
+                        sort=self.grid_ok.sort, geometry=bytes(self.saveGeometry().toBase64()).decode("ascii"))
         settings.save(self.cfg)
+
+    def _restore_geometry(self):
+        """Window size / position / maximized state from the last run. A bad value is ignored, never fatal."""
+        try:
+            g = self.cfg.get("geometry")
+            if g:
+                self.restoreGeometry(QByteArray.fromBase64(g.encode("ascii")))
+        except Exception:
+            pass
+
+    # ---- sort / dates --------------------------------------------------------------------------
+    def _sort_chosen(self, mode):
+        for g in self.grids:
+            g.set_sort(mode)
+        self.save_settings()
+
+    def need_dates(self, paths_):
+        """Look up the date taken of photos not asked about yet (cache, then EXIF) in the background."""
+        new = [p for p in paths_ if p not in self._date_asked and p not in self.dates]
+        if not new or self._closed:
+            return
+        self._date_asked.update(new)
+        self._date_queue = getattr(self, "_date_queue", []) + new
+        self._next_dates()
+
+    def _next_dates(self):
+        if self._date_worker is not None and self._date_worker.isRunning():
+            return
+        queue, self._date_queue = getattr(self, "_date_queue", []), []
+        if not queue:
+            return
+        self._date_worker = workers.DateWorker(self.index, queue)
+        self._date_worker.got.connect(self._dates_ready)
+        self._date_worker.finished.connect(self._next_dates)
+        self._date_worker.start()
+
+    def _dates_ready(self, found):
+        if self._closed:
+            return
+        self.dates.update(found)
+        for g in self.grids:
+            g.dates_changed()
 
     # ---- look & language ----------------------------------------------------------------------
     def _paint_toggles(self):
@@ -459,6 +516,9 @@ class MainWindow(QWidget):
         m = QMenu(self)
         for a in (self.act_refresh, self.act_copy, self.act_unchecked):
             m.addAction(a)
+        m.addSeparator()
+        m.addAction(self.act_updates)
+        m.addAction(self.act_about)
         m.exec(self.b_more.mapToGlobal(self.b_more.rect().bottomLeft()))
 
     # ---- accuracy presets ---------------------------------------------------------------------
@@ -887,7 +947,8 @@ class MainWindow(QWidget):
         self.scan_panel.set_found(len(self.grid_ok.items), len(self.grid_maybe.items))
         self.say(tr("掃描中…結果放入:{d}", d=os.path.basename(run["run_dir"])))
         self.worker = workers.ScanWorker(folders, self.index, eng, self.refs, self.low.value() / 100,
-                                         self.high.value() / 100, run["run_dir"])
+                                         self.high.value() / 100, run["run_dir"],
+                                         threads=settings.scan_threads(self.cfg))
         self.worker.phase.connect(self._scan_phase)
         self.worker.progress.connect(self._scan_progress)
         self.worker.matched.connect(self._scan_matched)
@@ -1043,6 +1104,10 @@ class MainWindow(QWidget):
     # ---- close --------------------------------------------------------------------------------
     def closeEvent(self, e):
         self.save_settings()
+        if self._date_worker is not None and self._date_worker.isRunning():
+            self._date_worker.stop()
+            self._date_worker.wait(15000)
+        self._date_queue = []
         if self.worker is not None and self.worker.isRunning():
             self.stop_task()
             if not self.worker.wait(15000):

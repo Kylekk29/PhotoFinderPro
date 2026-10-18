@@ -12,3 +12,6 @@ tmp/
 *.db-wal
 *.db-shm
 .pytest_cache/
+
+tools/sdk-buildtools/
+*.pfx

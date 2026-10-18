@@ -4,9 +4,33 @@ import json
 from . import paths
 
 DEFAULTS = {"folders": [], "output": "", "low": 0.30, "high": 0.50, "last_run": None,
-            "theme": "dark", "lang": "zh", "thumb": 200}
-CHOICES = {"theme": ("dark", "light"), "lang": ("zh", "en")}
+            "theme": "dark", "lang": "zh", "thumb": 200, "scan_threads": 0,
+            "geometry": "", "sort": "score"}
+CHOICES = {"theme": ("dark", "light"), "lang": ("zh", "en"), "sort": ("score", "date")}
 THUMB_RANGE = (120, 320)
+MAX_SCAN_THREADS = 16   # 0 = automatic
+
+
+def auto_threads(cpus=None):
+    """Scan threads when the setting is 0. Measured: gains flatten out around 4-6 threads (decode + inference)."""
+    import os
+    return min(6, max(1, (cpus or os.cpu_count() or 2) // 2))
+
+
+def scan_threads(cfg, cpus=None):
+    n = cfg.get("scan_threads", 0)
+    return n if isinstance(n, int) and 1 <= n <= MAX_SCAN_THREADS else auto_threads(cpus)
+
+
+def _valid_geometry(g):
+    """True if g is base64 text that looks like a Qt saveGeometry blob (magic number 0x1D9D0CB)."""
+    import base64
+    import binascii
+    try:
+        raw = base64.b64decode(g, validate=True)
+    except (binascii.Error, ValueError):
+        return False
+    return 0 < len(raw) <= 512 and raw[:4] == bytes.fromhex("01d9d0cb")
 
 
 def _clean(data):
@@ -30,6 +54,12 @@ def _clean(data):
     t = data.get("thumb")
     if isinstance(t, int) and not isinstance(t, bool) and THUMB_RANGE[0] <= t <= THUMB_RANGE[1]:
         cfg["thumb"] = t
+    n = data.get("scan_threads")
+    if isinstance(n, int) and not isinstance(n, bool) and 0 <= n <= MAX_SCAN_THREADS:
+        cfg["scan_threads"] = n
+    g = data.get("geometry")
+    if isinstance(g, str) and g and len(g) <= 1024 and _valid_geometry(g):
+        cfg["geometry"] = g
     return cfg
 
 

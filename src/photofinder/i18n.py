@@ -201,6 +201,22 @@ EN = {
     "讀取失敗:{e}": "Could not read the photo: {e}",
     "✓ 已確認係佢": "✓ Confirmed",
     "✗ 已標記唔係佢": "✗ Marked as not them",
+    "拍攝日期": "Date taken",
+    # --- sort, menu, about
+    "相似度": "Similarity",
+    "最相似嘅排最前": "Most similar first",
+    "最新拍攝嘅排最前(讀取相片嘅 EXIF 日期,冇就用檔案日期)":
+        "Newest first (uses the photo's EXIF date, or the file date if it has none)",
+    "檢查更新": "Check for updates",
+    "關於 Photo Finder Pro": "About Photo Finder Pro",
+    "版本 {v}": "Version {v}",
+    "100% 離線運作:程式本身唔會連線上網,冇追蹤,冇上載。":
+        "100% offline: the app itself never connects to the internet. No tracking, no uploads.",
+    "MIT 授權 · 免費開源": "MIT licence · free and open source",
+    "喺瀏覽器開啟專案網頁": "Open the project page in your browser",
+    "第三方授權聲明": "Third-party notices",
+    "開啟 THIRD_PARTY_NOTICES.txt": "Open THIRD_PARTY_NOTICES.txt",
+    "關閉": "Close",
 }
 
 

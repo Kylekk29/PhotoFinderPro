@@ -5,7 +5,8 @@ import numpy as np
 from PySide6.QtCore import QObject, QRunnable, QThread, Signal
 from PySide6.QtGui import QImage
 
-from . import copier, matcher, scanner, thumbs
+from . import copier, dates, matcher, scanner, settings, thumbs
+from .engine import FaceEngine
 from .i18n import tr
 
 
@@ -18,10 +19,13 @@ class ScanWorker(QThread):
     done = Signal(dict)
     failed = Signal(str)
 
-    def __init__(self, folders, index, engine, refs, low, high, out_root):
+    def __init__(self, folders, index, engine, refs, low, high, out_root, threads=None):
         super().__init__()
         self.folders, self.index, self.engine = folders, index, engine
         self.refs, self.low, self.high, self.out_root = refs, low, high, out_root
+        self.threads = threads if threads else settings.auto_threads()
+        # One engine per scan thread (OpenCV objects are not thread-safe). Stand-in engines stay single-threaded.
+        self.engine_factory = FaceEngine if isinstance(engine, FaceEngine) else None
         self.stop_event = threading.Event()
 
     def stop(self):
@@ -41,7 +45,8 @@ class ScanWorker(QThread):
                 self.phase.emit(tr("掃描新相…可以隨時停止,下次會由停低嗰度繼續。"))
                 res = scanner.scan([(f, True) for f in self.folders], self.index, self.engine,
                                    progress_cb=lambda *a: self.progress.emit(*a),
-                                   stop_event=self.stop_event, on_result=live)
+                                   stop_event=self.stop_event, on_result=live,
+                                   engine_factory=self.engine_factory, workers=self.threads)
             except copier.DiskLow:
                 res = {"total": 0, "scanned": 0, "skipped": 0, "failed": 0, "disk_low": True, "stopped": False}
             finally:
@@ -50,6 +55,46 @@ class ScanWorker(QThread):
             self.done.emit(res)
         except Exception as e:
             self.failed.emit(str(e))
+
+
+class DateWorker(QThread):
+    """Looks up when photos were taken (cache first, then EXIF / file time) without blocking the UI.
+    Emits {path: 'YYYY-MM-DD HH:MM:SS'} in small batches so the grid can update while it works."""
+    got = Signal(dict)
+
+    def __init__(self, index, paths):
+        super().__init__()
+        self.index, self.paths = index, list(paths)
+        self._stop = False
+
+    def stop(self):
+        self._stop = True
+
+    def run(self):
+        import os
+        import time
+        batch, last = {}, time.monotonic()
+        for p in self.paths:
+            if self._stop:
+                break
+            try:
+                m = os.stat(p).st_mtime_ns
+                t = self.index.get_date(p, m)
+                if t is None:
+                    t = dates.taken(p, m)
+                    self.index.save_date(p, m, t)
+                batch[p] = t
+            except Exception:
+                continue   # unreadable or missing: simply no date
+            if len(batch) >= 200 or time.monotonic() - last > 0.4:
+                self.got.emit(batch)
+                batch, last = {}, time.monotonic()
+        try:
+            self.index.commit()
+        except Exception:
+            pass
+        if batch:
+            self.got.emit(batch)
 
 
 class RefWorker(QThread):

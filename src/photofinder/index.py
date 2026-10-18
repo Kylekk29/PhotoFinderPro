@@ -50,6 +50,9 @@ class Index:
                 # copies already in the results folder are never moved or deleted because of it.
                 db.execute("CREATE TABLE IF NOT EXISTS verdicts("
                            "run_id INTEGER, path TEXT, verdict TEXT, PRIMARY KEY(run_id, path))")
+                # When each photo was taken (EXIF, else file time), cached for sorting. Only a cache.
+                db.execute("CREATE TABLE IF NOT EXISTS photo_dates("
+                           "path TEXT PRIMARY KEY, mtime_ns INTEGER, taken TEXT)")
                 db.commit()
         except sqlite3.DatabaseError:
             db.close()
@@ -177,6 +180,17 @@ class Index:
         """{path: "yes"|"no"} for one search."""
         with self.lock:
             return dict(self.db.execute("SELECT path, verdict FROM verdicts WHERE run_id=?", (run_id,)).fetchall())
+
+    # ---- date taken (cache; the photos themselves are never written) ------------------------------
+    def get_date(self, path, mtime_ns):
+        with self.lock:
+            row = self.db.execute("SELECT mtime_ns, taken FROM photo_dates WHERE path=?", (path,)).fetchone()
+        return row[1] if row and row[0] == mtime_ns else None
+
+    def save_date(self, path, mtime_ns, taken):
+        """Not committed here: the caller commits after a batch."""
+        with self.lock:
+            self.db.execute("INSERT OR REPLACE INTO photo_dates VALUES(?,?,?)", (path, mtime_ns, taken))
 
     def stats(self):
         with self.lock:

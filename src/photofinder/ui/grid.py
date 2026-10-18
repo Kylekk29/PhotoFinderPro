@@ -15,11 +15,24 @@ from .viewer import ViewerDialog
 KINDS = ("confirmed", "maybe", "rejected")
 
 
+class _View(QListWidget):
+    """List with the review keys: Enter opens the viewer, Y / N / U label the selection."""
+
+    def __init__(self, grid):
+        super().__init__()
+        self.grid = grid
+
+    def keyPressEvent(self, e):
+        if not self.grid.handle_key(e):
+            super().keyPressEvent(e)
+
+
 class ResultGrid(QWidget):
     def __init__(self, win, kind="confirmed"):
         super().__init__()
         self.win, self.kind = win, kind
         self.items, self.known, self.page = [], set(), 0
+        self.sort = "score"   # or "date" (newest first)
         self.rows, self.scores, self.qimgs = {}, {}, {}
         bar = QHBoxLayout()
         bar.setContentsMargins(4, 0, 0, 0)
@@ -36,7 +49,7 @@ class ResultGrid(QWidget):
         bar.addWidget(self.prev)
         bar.addWidget(self.next)
 
-        self.view = QListWidget()
+        self.view = _View(self)
         self.view.setObjectName("grid")
         self.view.setViewMode(QListWidget.IconMode)
         self.view.setResizeMode(QListWidget.Adjust)
@@ -89,8 +102,60 @@ class ResultGrid(QWidget):
     def pages(self):
         return max(1, -(-len(self.items) // PER_PAGE))
 
+    def _sorted(self, items):
+        """Best match first, or newest first (photos whose date is not known yet go last, by score)."""
+        if self.sort == "date":
+            d = self.win.dates
+            return sorted(items, key=lambda t: (d.get(t[1], ""), t[0]), reverse=True)
+        return sorted(items, key=lambda t: -t[0])
+
+    def set_sort(self, mode):
+        if mode == self.sort:
+            return
+        self.sort = mode
+        self.resort()
+
+    def resort(self):
+        """Re-order after the sort mode or the known dates changed; the selection is kept by render()."""
+        if self.sort == "date":
+            self.win.need_dates([p for _, p in self.items])
+        self.items[:] = self._sorted(self.items)
+        self.render()
+
+    def dates_changed(self):
+        if self.sort == "date":
+            self.resort()
+        else:
+            for path, it in self.rows.items():
+                it.setToolTip(self._tip(self.scores.get(path, 0.0), path))
+
+    def _tip(self, score, path):
+        d = self.win.dates.get(path)
+        return (f"{os.path.basename(path)}\n{tr('相似度 {s}%', s=f'{score * 100:.0f}')}\n"
+                + (f"{tr('拍攝日期')} {d}\n" if d else "") + path)
+
+    def handle_key(self, e):
+        """True if the key was used. Review keys only act on a selection and only when a search is open."""
+        k, ctrl = e.key(), bool(e.modifiers() & Qt.ControlModifier)
+        if k in (Qt.Key_Return, Qt.Key_Enter) and not ctrl:
+            it = self.view.currentItem() or next(iter(self.view.selectedItems()), None)
+            if it is not None:
+                self._open(it)
+            return True
+        if k == Qt.Key_A and ctrl:
+            self.view.selectAll()
+            return True
+        verdict = {Qt.Key_Y: "yes", Qt.Key_N: "no", Qt.Key_U: None}
+        if k in verdict and not (e.modifiers() & (Qt.ControlModifier | Qt.AltModifier)):
+            if self.win.run is not None and not self.win._busy and self.win._selected():
+                self.win._mark_selected(verdict[k])
+            return True
+        return False
+
     def set_items(self, items):
-        self.items = list(items)
+        self.items = self._sorted(items)
+        if self.sort == "date":
+            self.win.need_dates([p for _, p in self.items])
         self.known = {p for _, p in self.items}
         self.page = min(self.page, self.pages() - 1)
         self.render()
@@ -100,7 +165,7 @@ class ResultGrid(QWidget):
             return
         self.known.add(path)
         self.items.append((score, path))
-        self.items.sort(key=lambda t: -t[0])
+        self.items[:] = self._sorted(self.items)
         if not self._dirty:
             self._dirty = True
             QTimer.singleShot(500, self._flush)
@@ -133,7 +198,7 @@ class ResultGrid(QWidget):
         for score, path in chunk:
             it = QListWidgetItem(QIcon(self._tile(self.qimgs.get(path), score, path)), "")
             it.setData(Qt.UserRole, path)
-            it.setToolTip(f"{os.path.basename(path)}\n{tr('相似度 {s}%', s=f'{score * 100:.0f}')}\n{path}")
+            it.setToolTip(self._tip(score, path))
             self.view.addItem(it)
             self.rows[path] = it
             if path in selected:
@@ -142,6 +207,7 @@ class ResultGrid(QWidget):
                 self.win.request_thumb(path)
         self.view.blockSignals(False)
         self.view.itemSelectionChanged.emit()
+        self.win.need_dates([c[1] for c in chunk])   # for the tooltips; cheap and off the UI thread
         n = len(self.items)
         self.info.setText(tr("共 {n} 張 · 第 {p}/{t} 頁", n=n, p=self.page + 1, t=self.pages()) if n > PER_PAGE
                           else (tr("共 {n} 張", n=n) if n else ""))
@@ -243,5 +309,5 @@ class ResultGrid(QWidget):
         can_review = self.win.run is not None
         ViewerDialog(self, self.items, self.win.boxes, idx, verdicts=self.win.verdicts,
                      on_verdict=self.win.set_verdict if can_review else None,
-                     high=self.win.high.value() / 100).exec()
+                     high=self.win.high.value() / 100, dates=self.win.dates).exec()
         self.win.refresh_results()
