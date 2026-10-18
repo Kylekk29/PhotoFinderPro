@@ -13,7 +13,7 @@ binaries = collect_dynamic_libs("pi_heif")
 EXCLUDES = ["tkinter", "pytest", "matplotlib", "scipy", "pandas", "IPython", "unittest", "PyInstaller",
             "PySide6.QtWebEngineCore", "PySide6.QtWebEngineWidgets", "PySide6.Qt3DCore", "PySide6.QtQuick",
             "PySide6.QtQml", "PySide6.QtMultimedia", "PySide6.QtNetwork", "PySide6.QtSql", "PySide6.QtPdf",
-            "PySide6.QtSvg", "PySide6.QtDesigner", "PySide6.QtCharts", "PySide6.QtDataVisualization"]
+            "PySide6.QtDesigner", "PySide6.QtCharts", "PySide6.QtDataVisualization"]
 
 a = Analysis([str(ROOT / "packaging" / "launch.py")], pathex=[str(SRC)], binaries=binaries, datas=datas,
              hiddenimports=["pi_heif"], excludes=EXCLUDES, noarchive=False)

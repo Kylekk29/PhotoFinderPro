@@ -33,6 +33,8 @@ def selftest():
         import pi_heif
         heic = ".heic" in imageio.SUPPORTED_EXTS
         lines.append(f"pi_heif {pi_heif.__version__}: .heic supported: {heic}")
+        from . import ui  # a Qt module left out of the bundle only fails here, not in the engine checks above
+        lines.append(f"ui imports: yes ({ui.__name__})")
         ok = heic
     except Exception as e:  # report any failure
         ok = False

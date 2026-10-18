@@ -46,6 +46,20 @@ You give it a few reference photos of a person, for example Grandpa at different
 
 `SHA256SUMS.txt` lists the SHA-256 of each file if you want to check your download.
 
+### How to be sure your download is genuine
+
+1. Download only from this repository's **Releases** page (`github.com/Kylekk29/PhotoFinderPro/releases`), never from a mirror or a link someone sends you.
+2. Download `SHA256SUMS.txt` from the same release, next to the file you picked.
+3. Open PowerShell in your Downloads folder and run (use the name of the file you downloaded):
+
+   ```powershell
+   Get-FileHash .\PhotoFinderPro-1.0.0-x64-Setup.exe -Algorithm SHA256
+   ```
+
+4. Compare the `Hash` value with the line for that file in `SHA256SUMS.txt`. If they are identical (letters are not case-sensitive), the file is intact and is the one published here. If they differ, delete the file and download it again.
+
+The source code in this repository is the complete source of the app, and the app makes no network calls, so you can read it yourself.
+
 The app is not code-signed, so Windows SmartScreen may warn you the first time. Click **More info → Run anyway**.
 
 Settings, the scan index and thumbnails are stored in `%LOCALAPPDATA%\PhotoFinderPro` in both cases. Uninstalling the Setup version keeps this folder (and, of course, your photos and results). Delete it by hand if you want everything gone.

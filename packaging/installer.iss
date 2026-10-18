@@ -18,6 +18,10 @@ DefaultDirName={localappdata}\Programs\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#AppExe}
+UninstallDisplayName={#AppName}
+LicenseFile=..\LICENSE
+CloseApplications=yes
+RestartApplications=no
 SetupIconFile=..\src\photofinder\assets\app.ico
 OutputDir=..\dist
 OutputBaseFilename=PhotoFinderPro-{#AppVersion}-x64-Setup
@@ -38,9 +42,27 @@ Source: "..\dist\PhotoFinderPro\*"; DestDir: "{app}"; Flags: recursesubdirs crea
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
+Name: "{autoprograms}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 
-; Uninstall removes only the program folder. User data in %LOCALAPPDATA%\PhotoFinderPro and all photos/results are never touched.
+; Uninstall removes the program folder. It asks whether to also delete settings/index/thumbnails in
+; %LOCALAPPDATA%\PhotoFinderPro (default: keep). Original photos and exported results are never touched.
+[Code]
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  DataDir: String;
+begin
+  if (CurUninstallStep = usPostUninstall) and not UninstallSilent then
+  begin
+    DataDir := ExpandConstant('{localappdata}\PhotoFinderPro');
+    if DirExists(DataDir) then
+      if MsgBox('Also delete Photo Finder Pro settings, scan index and thumbnails?' + #13#10 + #13#10 +
+                DataDir + #13#10 + #13#10 +
+                'Your photos and saved results are NOT affected. Choose No to keep them (for a later reinstall).',
+                mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+        DelTree(DataDir, True, True, True);
+  end;
+end;
