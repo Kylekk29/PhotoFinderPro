@@ -36,11 +36,14 @@ You give it a few reference photos of a person, for example Grandpa at different
 
 ## Install (Windows 10/11)
 
-1. Download `PhotoFinderPro-<version>-win64.zip` from [Releases](../../releases/latest).
-2. Unzip it anywhere and run `PhotoFinderPro.exe`. You don't need to install anything or have admin rights.
-3. The app is not code-signed, so Windows SmartScreen may warn you the first time. Click **More info → Run anyway**.
+[**Download for Windows**](../../releases/latest). The release has two files, so pick one:
 
-Settings, the scan index and thumbnails are stored in `%LOCALAPPDATA%\PhotoFinderPro`. To uninstall, delete the unzipped folder and that folder.
+- **Setup (recommended):** `PhotoFinderPro-Setup-<version>.exe`. Double-click it and follow the wizard. It installs for your user only, so it needs no admin rights. You get a Start menu entry (and an optional desktop shortcut), and you can remove it in Windows **Settings → Apps**.
+- **Portable:** `PhotoFinderPro-<version>-Portable.exe`. A single file. Put it anywhere and double-click it. Nothing is installed. The first start takes a few seconds while it unpacks itself.
+
+The app is not code-signed, so Windows SmartScreen may warn you the first time. Click **More info → Run anyway**.
+
+Settings, the scan index and thumbnails are stored in `%LOCALAPPDATA%\PhotoFinderPro` in both cases. Uninstalling the Setup version keeps this folder (and, of course, your photos and results). Delete it by hand if you want everything gone.
 
 ## How to use
 
@@ -66,11 +69,13 @@ Run the tests. They use synthetic images and a fake face engine, with no real ph
 venv\Scripts\python -m pytest -q -p no:cacheprovider tests
 ```
 
-Build the portable zip. This uses PyInstaller onedir, runs a self-test, then zips the result:
+Build both release files (onedir build, self-test, onefile build, self-test, installer). The installer step needs [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install --id JRSoftware.InnoSetup -e`):
 
 ```bat
 cmd /c packaging\build.bat
 ```
+
+Outputs: `dist\PhotoFinderPro-Setup-1.0.0.exe` and `dist\PhotoFinderPro-1.0.0-Portable.exe`.
 
 ## Project layout
 
@@ -78,7 +83,7 @@ cmd /c packaging\build.bat
 src/photofinder/      engine, scanner, index (SQLite), matcher, copier (copy-only), workers, settings, i18n, theme
 src/photofinder/ui/   main window, result grid, viewer, history, dialogs, widgets, icons
 models/               YuNet (MIT) and SFace (Apache-2.0) ONNX models from OpenCV Zoo
-packaging/            PyInstaller spec, build script, icon generator
+packaging/            PyInstaller specs (onedir + onefile), Inno Setup script, build script, icon generator
 tests/                pytest suite
 docs/                 screenshots and research notes
 ```
@@ -89,7 +94,7 @@ docs/                 screenshots and research notes
 - Windows only for now.
 - This is a personal project, not a commercial product. The SFace weights were trained on public face datasets whose terms may restrict commercial use. Please only search photo collections you own or are allowed to use.
 
-Third-party licences are listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
+Licensed under the [MIT License](LICENSE). Third-party licences are listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
 
 ---
 
@@ -101,4 +106,9 @@ Third-party licences are listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES
 - 原相只會讀取,唔會改動、搬走或者刪除。
 - 雙擊相片後用 Y / N 鍵快速確認,完成後一鍵匯出最終結果。
 
-由 [Releases](../../releases/latest) 下載 zip,解壓後執行 `PhotoFinderPro.exe` 就用得。如果 Windows 彈出警告,撳「其他資訊 → 仍要執行」。
+由 [Releases](../../releases/latest) 下載。有兩個檔案,揀一個就得:
+
+- **安裝版(建議)**:`PhotoFinderPro-Setup-<版本>.exe`,㩒兩下跟住嚮導行。只會裝俾你自己(唔使管理員權限),有開始功能表捷徑,可以喺 Windows「設定 → 應用程式」解除安裝。
+- **免安裝版**:`PhotoFinderPro-<版本>-Portable.exe`,單一檔案,放邊度都得,㩒兩下就用,唔會安裝任何嘢。第一次開會要幾秒鐘解壓。
+
+如果 Windows 彈出警告,撳「其他資訊 → 仍要執行」。解除安裝只會移除程式,你嘅相片同結果,以及 `%LOCALAPPDATA%\PhotoFinderPro` 內嘅資料都會保留。
