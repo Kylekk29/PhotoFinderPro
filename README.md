@@ -9,6 +9,13 @@ Your originals are only read. Matches are <b>copied</b> to a results folder; not
 
 <p align="center"><b><a href="../../releases/latest">⬇ Download for Windows</a></b> · English · <a href="README.zh-CN.md">简体中文</a> · free and open source (MIT)</p>
 
+<p align="center">
+<a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/Kylekk29/PhotoFinderPro" alt="Release"></a>
+<img src="https://img.shields.io/badge/platform-Windows%2010%2F11-blue" alt="Windows 10/11">
+<img src="https://img.shields.io/badge/runs-100%25%20offline-brightgreen" alt="Offline">
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT"></a>
+</p>
+
 ![Photo Finder Pro, dark theme](docs/screenshots/dark.png)
 
 ## What it does
